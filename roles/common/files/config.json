@@ -1,0 +1,20 @@
+{
+ "alertingurl": "",
+ "clusterid": "mycluster-1024",
+ "dataiface": "",
+ "kvdb": [
+	 "ADD HERE YOUR ETCD or CONSUL"
+ ],
+ "mgtiface": "",
+ "scheduler": "none",
+ "storage": {
+   "devices": [
+     "/dev/vdb",
+     "/dev/vdc",
+     "/dev/vdd"
+   ],
+   "journal_dev": "",
+   "system_metadata_dev": ""
+ },
+ "version": "1.0"
+}

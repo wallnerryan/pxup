@@ -1,0 +1,48 @@
+- name: update
+  yum:
+    name: '*'
+    state: latest
+
+- name: build hosts file
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_eth1.ipv4.address }} {{item}}" state=present
+  when: hostvars[item].ansible_eth1.ipv4.address is defined
+  with_items: "{{ groups['all'] }}"
+
+- name: disable selinux
+  selinux: state=disabled
+
+- name: disable of selinux - now
+  command: setenforce 0
+
+- name: Create /etc/pwx
+  file: path=/etc/pwx state=directory
+
+- name: Install px config
+  copy: src=config.json owner=root group=root dest=/etc/pwx/config.json
+
+- name: install utility programs
+  yum: name={{ item }} state=present disable_gpg_check=yes
+  with_items:
+    - wget
+    - ntp
+    - screen
+    - epel-release
+    - vim
+    - iptables
+    - iptables-utils
+    - iptables-services
+    - ncurses-term
+    - docker
+
+- name: enable kube services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - docker
+    - ntpd
+
+- name: Installing and staring Px container. This may take a while
+  command: docker run --name px-dev -d --net=host --privileged=true -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules {{ pximage }}
+
+- name: Waiting for SDK Port to be online
+  wait_for: timeout=600 port=9020
+
