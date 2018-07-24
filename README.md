@@ -1,6 +1,6 @@
 # pxup
 
-Bring up a Portworx cluster using Vagrant and libvirt using command line docker
+Bring up a Portworx cluster using Vagrant and libvirt based on docker
 
 # Usage
 
