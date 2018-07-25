@@ -18,7 +18,7 @@
   file: path=/etc/pwx state=directory
 
 - name: Install px config
-  copy: src=config.json owner=root group=root dest=/etc/pwx/config.json
+  copy: src=config.json owner=root group=root dest=/etc/pwx/config.json force=no
 
 - name: install utility programs
   yum: name={{ item }} state=present disable_gpg_check=yes
@@ -34,14 +34,30 @@
     - ncurses-term
     - docker
 
-- name: enable kube services
+- name: enable docker services
   service: name={{ item }} state=started enabled=yes
   with_items:
     - docker
     - ntpd
 
-- name: Installing and staring Px container. This may take a while
-  command: docker run --name px-dev -d --net=host --privileged=true -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules {{ pximage }}
+- name: Pulling pximage
+  command: docker pull {{ pximage }}
+
+- name: determine if it is running already
+  command: docker inspect px-dev
+  register: inspect_result
+  ignore_errors: True
+
+- name: stop px-dev
+  command: docker stop px-dev
+  when: inspect_result is succeeded
+
+- name: rm px-dev
+  command: docker rm px-dev
+  when: inspect_result is succeeded
+
+- name: Installing and starting Px container. This may take a while
+  command: docker run --name px-dev -d --net=host --privileged=true -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
 
 - name: Waiting for SDK Port to be online
   wait_for: timeout=600 port=9020

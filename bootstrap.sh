@@ -13,14 +13,9 @@ start_services() {
 fedora_setup() {
     echo "--> Installing applications (Fedora)"
     sudo dnf -y install libvirt \
-        dnsmasq \
         qemu \
         qemu-kvm \
-        git \
-        golang \
-        docker \
-        jq \
-        wget \
+		ansible \
         virt-install \
         virt-manager
     if [ $? -ne 0 ] ; then
@@ -34,14 +29,9 @@ fedora_setup() {
 centos_setup() {
     echo "--> Installing applications (CentOS)"
     sudo yum -y install libvirt \
-        dnsmasq \
         qemu \
         qemu-kvm \
-        git \
-        golang \
-        docker \
-        jq \
-        wget \
+		ansible \
         virt-install \
         virt-manager
     if [ $? -ne 0 ] ; then
