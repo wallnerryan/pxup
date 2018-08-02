@@ -10,13 +10,17 @@ Bring up a Portworx cluster using Vagrant and libvirt based on docker
 An etcd server will be setup in node0 and configured in config.json. If you would like your
 own etcd server endpoints you can adjust `roles/common/files/config.json`.
 
-## Build the cluster
+### Build the cluster
 
 * Run `./up.sh` and enjoy
 
-After redeploy a new version:
+### Redeploy
 
-* Run `./update.sh`
+Once the system is running, to redeploy a new version type:
+
+```
+$ ./update.sh
+```
 
 # Infrastructure
 
