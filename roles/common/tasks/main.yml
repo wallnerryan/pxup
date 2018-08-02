@@ -33,12 +33,17 @@
     - iptables-services
     - ncurses-term
     - docker
+    - etcd
+
+- name: update etcd config
+  lineinfile: dest=/etc/etcd/etcd.conf regexp='^ETCD_LISTEN_CLIENT_URLS=' line='ETCD_LISTEN_CLIENT_URLS=http://{{ ansible_eth1.ipv4.address }}:2379,http://127.0.0.1:2379' state=present
 
 - name: enable docker services
   service: name={{ item }} state=started enabled=yes
   with_items:
     - docker
     - ntpd
+    - etcd
 
 - name: Pulling pximage
   command: docker pull {{ pximage }}
@@ -57,7 +62,7 @@
   when: inspect_result is succeeded
 
 - name: Installing and starting Px container. This may take a while
-  command: docker run --name px-dev -d --net=host --privileged=true -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
+  command: docker run --name px-dev -d --net=host --privileged=true -e PORTWORX_ENABLE_SDK=yes -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
 
 - name: Waiting for SDK Port to be online
   wait_for: timeout=600 port=9020

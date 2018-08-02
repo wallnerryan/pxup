@@ -4,10 +4,19 @@ Bring up a Portworx cluster using Vagrant and libvirt based on docker
 
 # Usage
 
-0. One time setup: `./bootstrap.sh`
-1. Set the name of your image name in `global_vars.yaml` 
-2. Adjust `roles/common/files/config.json`
-3. Run `./up.sh` and enjoy
+* One time setup: `./bootstrap.sh`
+* Set the name of your image name in `global_vars.yaml` 
+
+An etcd server will be setup in node0 and configured in config.json. If you would like your
+own etcd server endpoints you can adjust `roles/common/files/config.json`.
+
+## Build the cluster
+
+* Run `./up.sh` and enjoy
+
+After redeploy a new version:
+
+* Run `./update.sh`
 
 # Infrastructure
 
