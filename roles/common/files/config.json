@@ -1,6 +1,9 @@
 {
  "alertingurl": "",
  "clusterid": "pxup-cluster",
+ "secret": {
+	 "secret_type": "kvdb"
+ },
  "dataiface": "",
  "kvdb": [
    "etcd:http://192.168.10.100:2379"

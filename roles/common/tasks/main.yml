@@ -18,7 +18,7 @@
   file: path=/etc/pwx state=directory
 
 - name: Install px config
-  copy: src=config.json owner=root group=root dest=/etc/pwx/config.json force=no
+  copy: src=config.json owner=root group=root dest=/etc/pwx/config.json force=yes
 
 - name: install utility programs
   yum: name={{ item }} state=present disable_gpg_check=yes
@@ -66,4 +66,7 @@
 
 - name: Waiting for system to be online
   wait_for: timeout=600 port=9001
+
+- name: setup trial license
+  command: timeout 30 sh -c 'until /opt/pwx/bin/pxctl license act trial > /dev/null 2>&1; do sleep 1 ; done'
 
