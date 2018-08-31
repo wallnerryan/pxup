@@ -1,6 +1,21 @@
 # pxup
 
-Bring up a Portworx cluster using Vagrant and libvirt based on docker
+Bring up a Portworx cluster using Vagrant and libvirt based on docker. It also installs a minio server on each
+node on port 7999 with access_key `admin` and secret_key `password`.
+
+To use with sdk-test:
+
+```yaml
+cloudproviders:
+  aws:
+    CredName: "minio"
+    CredType: "s3"
+    CredRegion: "us-east-1"
+    CredAccessKey: "admin"
+    CredEndpoint: "192.168.10.100:7999"
+    CredSecretKey: "password"
+    CredDisableSSL: "true"
+```
 
 # Usage
 

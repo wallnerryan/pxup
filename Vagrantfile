@@ -8,6 +8,9 @@ DISKS = 3
 MEMORY = 4096
 CPUS = 2
 
+### TYPE HERE A PREFIX ###
+PREFIX = "px" 
+
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
     config.vm.box = "centos/7"
@@ -19,14 +22,14 @@ Vagrant.configure("2") do |config|
 
     # Make the glusterfs cluster, each with DISKS number of drives
     (0..NODES-1).each do |i|
-        config.vm.define "node#{i}" do |node|
-            node.vm.hostname = "node#{i}"
+        config.vm.define "#{PREFIX}-node#{i}" do |node|
+            node.vm.hostname = "#{PREFIX}-node#{i}"
             node.vm.network :private_network, ip: "192.168.10.10#{i}"
 
             (0..DISKS-1).each do |d|
                 node.vm.provider :libvirt do  |lv|
                     driverletters = ('b'..'z').to_a
-                    lv.storage :file, :device => "vd#{driverletters[d]}", :path => "atomic-disk-#{i}-#{d}.disk", :size => '1024G'
+                    lv.storage :file, :device => "vd#{driverletters[d]}", :path => "#{PREFIX}-disk-#{i}-#{d}.disk", :size => '1024G'
                     lv.memory = MEMORY
                     lv.cpus = CPUS
                 end
@@ -39,7 +42,7 @@ Vagrant.configure("2") do |config|
                     ansible.limit = "all"
                     ansible.playbook = "site.yml"
                     ansible.groups = {
-                        "nodes" => (0..NODES-1).map {|j| "node#{j}"},
+                        "nodes" => (0..NODES-1).map {|j| "#{PREFIX}-node#{j}"},
                     }
                 end
             end
