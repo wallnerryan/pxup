@@ -12,7 +12,7 @@ cloudproviders:
     CredType: "s3"
     CredRegion: "us-east-1"
     CredAccessKey: "admin"
-    CredEndpoint: "192.168.10.100:7999"
+    CredEndpoint: "NODEIPHERE:7999"
     CredSecretKey: "password"
     CredDisableSSL: "true"
 ```
