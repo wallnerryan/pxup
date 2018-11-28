@@ -94,5 +94,4 @@
 
 - name: login to secret kvdb
   command: /opt/pwx/bin/pxctl secrets kvdb login
-  ignore_errors: True
 
