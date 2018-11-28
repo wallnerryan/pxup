@@ -92,3 +92,7 @@
 - name: setup trial license
   command: timeout 30 sh -c 'until /opt/pwx/bin/pxctl license act trial > /dev/null 2>&1; do sleep 1 ; done'
 
+- name: login to secret kvdb
+  command: /opt/pwx/bin/pxctl secrets kvdb login
+  ignore_errors: True
+
