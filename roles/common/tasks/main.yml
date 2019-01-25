@@ -41,7 +41,6 @@
     - iptables-utils
     - iptables-services
     - ncurses-term
-    - docker
     - etcd
 
 - name: install epel  utility programs
