@@ -32,7 +32,6 @@
 - name: install utility programs
   yum: name={{ item }} state=present disable_gpg_check=yes
   with_items:
-    - jq
     - wget
     - ntp
     - screen
@@ -44,6 +43,32 @@
     - ncurses-term
     - docker
     - etcd
+
+- name: install epel  utility programs
+  yum: name={{ item }} state=present disable_gpg_check=yes
+  with_items:
+    - jq
+    - lvm2
+    - yum-utils
+    - device-mapper-persistent-data
+
+- name: remove all old docker
+  yum: name={{ item }} state=removed disable_gpg_check=yes
+  with_items:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-engine
+
+- name: install docker ce yum repo
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: install docker ce
+  yum: name=docker-ce state=present disable_gpg_check=yes
 
 - name: update etcd config
   lineinfile: dest=/etc/etcd/etcd.conf regexp='^ETCD_LISTEN_CLIENT_URLS=' line='ETCD_LISTEN_CLIENT_URLS=http://{{ ansible_eth1.ipv4.address }}:2379,http://127.0.0.1:2379' state=present
