@@ -17,6 +17,9 @@
 - name: Create /etc/pwx
   file: path=/etc/pwx state=directory
 
+- name: Create /var/lib/portworx
+  file: path=/var/lib/portworx state=directory
+
 - name: Create /minio
   file: path=/minio state=directory
 
@@ -29,6 +32,7 @@
 - name: install utility programs
   yum: name={{ item }} state=present disable_gpg_check=yes
   with_items:
+    - jq
     - wget
     - ntp
     - screen
@@ -68,7 +72,7 @@
   when: inspect_result is succeeded
 
 - name: Installing and starting Px container. This may take a while
-  command: docker run --name px-dev -d --net=host --privileged=true -e PORTWORX_ENABLE_SDK=yes -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
+  command: docker run --name px-dev -d --net=host --privileged=true -e OPENSTORAGE_AUTH_SHAREDSECRET=mysecret -v /var/lib/portworx:/var/lib/portworx -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
 
 - name: determine if minio is running already
   command: docker inspect minio
