@@ -42,6 +42,8 @@
     - iptables-services
     - ncurses-term
     - etcd
+    - kernel-devel
+    - kernel-headers
 
 - name: install epel  utility programs
   yum: name={{ item }} state=present disable_gpg_check=yes
@@ -79,8 +81,17 @@
     - ntpd
     - etcd
 
+- name: copy docker image to host
+  copy: src=px.img owner=root group=root dest=/root force=yes 
+  when: not pullimage
+
+- name: install image
+  shell: docker load < /root/px.img
+  when: not pullimage
+
 - name: Pulling pximage
   command: docker pull {{ pximage }}
+  when: pullimage
 
 - name: determine if it is running already
   command: docker inspect px-dev
@@ -96,7 +107,7 @@
   when: inspect_result is succeeded
 
 - name: Installing and starting Px container. This may take a while
-  command: docker run --name px-dev -d --net=host --privileged=true -e OPENSTORAGE_AUTH_SHAREDSECRET=mysecret -v /var/lib/portworx:/var/lib/portworx -v /mnt:/mnt:shared -v /run/docker/plugins:/run/docker/plugins  -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_porc/1/ns {{ pximage }}
+  command: docker run --name px-dev -d --net=host --privileged=true -e PORTWORX_AUTH_SYSTEM_KEY=mysecret -e PORTWORX_AUTH_JWT_SHAREDSECRET=mysecret -e PORTWORX_AUTH_JWT_ISSUER=openstorage.io -e PORTWORX_AUTH_USERNAME_CLAIM=email -v /etc/hosts:/etc/hosts:ro -v /etc/resolv.conf:/etc/resolv.conf:ro -v /var/lib/portworx:/var/lib/portworx -v /mnt:/mnt:shared -v /run/docker:/run/docker -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /run/lvm:/run/lvm -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_proc/1/ns {{ pximage }}
 
 - name: determine if minio is running already
   command: docker inspect minio
