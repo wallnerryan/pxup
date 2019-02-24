@@ -1,7 +1,7 @@
-- name: update
-  yum:
-    name: '*'
-    state: latest
+#- name: update
+#  yum:
+#    name: '*'
+#    state: latest
 
 - name: build hosts file
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_eth1.ipv4.address }} {{item}}" state=present
@@ -117,13 +117,22 @@
   command: docker run --name px-dev -d --net=host --privileged=true -e PORTWORX_AUTH_SYSTEM_KEY=mysecret -e PORTWORX_AUTH_JWT_SHAREDSECRET=mysecret -e PORTWORX_AUTH_JWT_ISSUER=openstorage.io -e PORTWORX_AUTH_USERNAME_CLAIM=email -v /etc/hosts:/etc/hosts:ro -v /etc/resolv.conf:/etc/resolv.conf:ro -v /var/lib/portworx:/var/lib/portworx -v /mnt:/mnt:shared -v /run/docker:/run/docker -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /etc/pwx:/etc/pwx -v /opt/pwx/bin:/export_bin -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /run/lvm:/run/lvm -v /var/run/docker.sock:/var/run/docker.sock  -v /var/cores:/var/cores -v /usr/src:/usr/src -v /lib/modules:/lib/modules -v /opt/pwx:/opt/pwx -v /etc/systemd/system:/etc/systemd/system -v /host_proc/1/ns:/host_proc/1/ns {{ pximage }}
   when: not oci
 
+- name: check if px-runc is installed
+  stat:
+    path: /opt/pwx/bin/px-runc
+  register: px_runc_rules
+
 - name: Installing OCI image
   command: docker run --entrypoint /runc-entry-point.sh --rm -i --privileged=true -v /opt/pwx:/opt/pwx -v /etc/pwx:/etc/pwx {{ pximage }} --upgrade
   when: oci
 
 - name: Install px from oci image
-  command: /opt/pwx/bin/px-runc  install -c "pxup-cluster" -k etcd:http://{{ hostvars[groups['all'][0]].ansible_eth1.ipv4.address }}:2379 -jwt_issuer=openstorage.io -jwt_shared_secret=mysecret -auth_system_key=mysecret -A
-  when: oci
+  command: /opt/pwx/bin/px-runc  install -c "pxup-cluster" -k etcd:http://{{ hostvars[groups['all'][0]].ansible_eth1.ipv4.address }}:2379 -A {{ oci_switches }}
+  when: oci and not auth and not px_runc_rules.stat.exists
+
+- name: Install px from oci image
+  command: /opt/pwx/bin/px-runc  install -c "pxup-cluster" -k etcd:http://{{ hostvars[groups['all'][0]].ansible_eth1.ipv4.address }}:2379 -jwt_issuer=openstorage.io -jwt_shared_secret={{ shared_secret }} -auth_system_key=mysecret -A {{ oci_switches }}
+  when: oci and auth and not px_runc_rules.stat.exists
 
 - name: Systemctl start portworx
   service: name=portworx state=restarted enabled=yes
