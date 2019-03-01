@@ -9,7 +9,7 @@ MEMORY = 4096
 CPUS = 2
 
 ### TYPE HERE A PREFIX ###
-PREFIX = "px" 
+PREFIX = "ryanpx" 
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
     (0..NODES-1).each do |i|
         config.vm.define "#{PREFIX}-node#{i}" do |node|
             node.vm.hostname = "#{PREFIX}-node#{i}"
-            node.vm.network :private_network, ip: "192.168.10.10#{i}"
+            node.vm.network :private_network, ip: "192.168.20.10#{i}"
 
             (0..DISKS-1).each do |d|
                 node.vm.provider :libvirt do  |lv|
